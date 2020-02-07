@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            .sugerencias{
+                border: 1px solid black;
+                width: 550px;
+                height: 150px;
+                margin-left: 150px;
+            }
+        </style>
+        <script>
+            function creaDiv() {
+                //var div=document.createElement("div");
+                //div.id="sugerencias";
+                //document.body.appendChild(div);
+                document.getElementById("libro").onkeyup=autocompletado;
+                avanzaSeleccion=-1;
+                document.getElementById("libro").focus();
+            }
+            
+            function autocompletado() {
+                var libro=document.getElementById("libro").value;
+                peticion_http = inicializa_xhr();
+                    if (peticion_http) {
+                    peticion_http.onreadystatechange = cargarSugerencias;
+                    peticion_http.open('POST', 'respuestaLibros.jsp', true);
+                    peticion_http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    var texto="libro="+encodeURIComponent(libro);
+                    peticion_http.send(texto);
+                    
+                    //CONTINUAR POR AQUI
+                    
+                }
+                
+                function cargarSugerencias() {
+                    if (peticion_http.readyState == 4) {
+                        if (peticion_http.status == 200) {
+                            var caja=document.getElementById("libro");
+                            
+                            var respuesta_Json = peticion_http.responseText;
+                            var titulos = eval("(" + respuesta_Json + ")");
+                            var sugerencias = document.getElementById("sugerencias");
+                            console.log(titulos);
+                            console.log(sugerencias);
+                            var lista=document.createElement("select");
+                            lista.size="5";
+                            lista.setAttribute("display", "none");
+                            lista.id="lista";
+                            var sugerencias=document.getElementById("sugerencias");
+                            sugerencias.innerHTML="";
+                            sugerencias.appendChild(lista);
+                            var cajaTexto=document.getElementById("libro").value;
+                            if(titulos.length!=0){
+                                if(cajaTexto.length!=0){
+                                    lista.setAttribute("display", "block");
+                                for (var i = 0; i < titulos.length; i++) {
+                                    var li=document.createElement("option");
+                                    var texto=document.createTextNode(titulos[i].titulo);
+                                    li.appendChild(texto);
+                                    lista.appendChild(li);
+
+                                }}
+                            }else{
+                                var li=document.createElement("option");
+                                var texto=document.createTextNode("No existe ese libro");
+                                li.appendChild(texto);
+                                lista.appendChild(li);
+                            }
+                            
+                        }
+                    }
+                }
+            }
+            
+            
+            function inicializa_xhr() {
+                if (window.XMLHttpRequest) {
+                    return new XMLHttpRequest();
+                } else if (window.ActiveXObject) {
+                    return new ActiveXObject("Microsoft.XMLHTTP");
+                }
+            }
+        </script>
+    </head>
+    <body onload="creaDiv()">
+        <div>Autocompletado</div>
+
+        <form>
+            <label for="libro">Introduce el nombre del libro</label>
+            <input type="text" name="libro" id="libro">
+            
+        </form>
+        <div id="sugerencias"></div>
+    </body>
+</html>
