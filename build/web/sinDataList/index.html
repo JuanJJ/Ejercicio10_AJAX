@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            .sugerencias{
+                border: 1px solid black;
+                width: 550px;
+                height: 150px;
+                margin-left: 150px;
+            }
+        </style>
+        <script>
+            function creaDiv() {
+                var div = document.createElement("div");
+                div.id = "sugerencias";
+                document.body.appendChild(div);
+                titulos=null;
+                document.getElementById("libro").onkeyup = autocompletado;
+                avanzaSeleccion = -1;
+                document.getElementById("libro").focus();
+            }
+
+            function autocompletado(evento) {
+                var libro = document.getElementById("libro").value;
+                if (evento.keyCode == 40) {
+                    avanzaSeleccion++;
+                    seleccionar();
+                } else
+                if (evento.keyCode == 38) {
+                    avanzaSeleccion--;
+                    seleccionar();
+                } else
+                if (evento.keyCode == 13) {
+                    var listaF=document.getElementById(avanzaSeleccion);
+                    if(avanzaSeleccion!=-1){
+                        document.getElementById("libro").value=listaF.value;
+                    }
+                    sugerencias.style.display = "none";
+                } else {
+                    avanzaSeleccion=-1;
+                    peticion_http = inicializa_xhr();
+                    if (peticion_http) {
+                        peticion_http.onreadystatechange = cargarSugerencias;
+                        peticion_http.open('POST', 'respuestaLibros.jsp', true);
+                        peticion_http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                        var texto = "libro=" + encodeURIComponent(libro);
+                        peticion_http.send(texto);
+
+                        //CONTINUAR POR AQUI
+
+                    }
+                }
+                console.log(avanzaSeleccion);
+            }
+            function seleccionar(){
+                var listaF=document.getElementById(avanzaSeleccion);
+                if(avanzaSeleccion<0){
+                    avanzaSeleccion=0;
+                }
+                if(avanzaSeleccion==titulos.length){
+                    avanzaSeleccion=titulos.length-1;
+                }
+                if(listaF!=null){
+                    listaF.selected="on";
+                }
+            }
+            function cargarSugerencias() {
+                if (peticion_http.readyState == 4) {
+                    if (peticion_http.status == 200) {
+                        var caja = document.getElementById("libro");
+
+                        var respuesta_Json = peticion_http.responseText;
+                        titulos = eval("(" + respuesta_Json + ")");
+                        var sugerencias = document.getElementById("sugerencias");
+                        console.log(titulos);
+                        console.log(sugerencias);
+                        var lista = document.createElement("select");
+                        lista.size = "5";
+                        sugerencias.style.display = "none";
+                        lista.style.width = "500px";
+                        lista.id = "lista";
+
+                        sugerencias.innerHTML = "";
+                        sugerencias.appendChild(lista);
+                        var cajaTexto = document.getElementById("libro").value;
+                        if (titulos.length != 0) {
+                            if (cajaTexto.length != 0) {
+                                sugerencias.style.display = "block";
+                                for (var i = 0; i < titulos.length; i++) {
+                                    var li = document.createElement("option");
+                                    li.id=i;
+                                    li.value=titulos[i].titulo;
+                                    var texto = document.createTextNode(titulos[i].titulo);
+                                    li.appendChild(texto);
+                                    lista.appendChild(li);
+
+                                }
+                            } else {
+                                sugerencias.style.display = "none";
+                            }
+                        } else {
+                            sugerencias.style.display = "block";
+                            var li = document.createElement("option");
+                            var texto = document.createTextNode("No existe ese libro");
+                            li.appendChild(texto);
+                            lista.appendChild(li);
+                        }
+
+                    }
+                }
+
+            }
+
+
+            function inicializa_xhr() {
+                if (window.XMLHttpRequest) {
+                    return new XMLHttpRequest();
+                } else if (window.ActiveXObject) {
+                    return new ActiveXObject("Microsoft.XMLHTTP");
+                }
+            }
+        </script>
+    </head>
+    <body onload="creaDiv()">
+        <div>Autocompletado</div>
+
+
+        <label for="libro">Introduce el nombre del libro</label>
+        <input type="text" name="libro" id="libro">
+
+
+    </body>
+</html>
