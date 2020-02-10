@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <script>
+            function creaDiv() {
+                var div=document.createElement("div");
+                div.id="sugerencias";
+                var cajaTexto=document.getElementById("libro");
+                cajaTexto.setAttribute("list","libros");
+                document.body.appendChild(div);
+                document.getElementById("libro").onkeyup=autocompletado;
+                document.getElementById("libro").focus();
+            }
+            
+            function autocompletado() {
+                var libro=document.getElementById("libro").value;
+                peticion_http = inicializa_xhr();
+                    if (peticion_http) {
+                    peticion_http.onreadystatechange = cargarSugerencias;
+                    peticion_http.open('POST', 'respuestaLibros.jsp', true);
+                    peticion_http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    var texto="libro="+encodeURIComponent(libro);
+                    peticion_http.send(texto);
+                    
+                    
+                }
+                
+                function cargarSugerencias(evento) {
+                    if (peticion_http.readyState == 4) {
+                        if (peticion_http.status == 200) {
+                            if(evento.keyCode != 38&&evento.keyCode!=13&&evento.keyCode != 40){
+
+                                var respuesta_Json = peticion_http.responseText;
+                                var titulos = eval("(" + respuesta_Json + ")");
+                                var sugerencias = document.getElementById("sugerencias");
+                                sugerencias.innerHTML="";
+                                console.log(titulos);
+                                var lista=document.createElement("datalist");
+                                lista.id="libros";
+                                sugerencias.appendChild(lista);
+                                
+                                for (var i = 0; i < titulos.length; i++) {
+                                    var opcion=document.createElement("option");
+                                    opcion.value=titulos[i].titulo;
+                                    lista.appendChild(opcion);
+                                }
+                                
+                            }
+                        }
+                    }
+                }
+            }
+            
+            
+            function inicializa_xhr() {
+                if (window.XMLHttpRequest) {
+                    return new XMLHttpRequest();
+                } else if (window.ActiveXObject) {
+                    return new ActiveXObject("Microsoft.XMLHTTP");
+                }
+            }
+        </script>
+    </head>
+    <body onload="creaDiv()">
+        <div>Autocompletado</div>
+
+            <label for="libro">Introduce el nombre del libro</label>
+            <input type="text" name="libro" id="libro">
+
+    </body>
+</html>

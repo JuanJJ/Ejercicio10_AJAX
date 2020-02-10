@@ -52,8 +52,9 @@ public class Bd {
     
     public List<Libro> getLibros(String libro) throws SQLException{
         List<Libro>lista=new ArrayList<>();
-        
-        String sql="SELECT Titulo FROM `titulos` WHERE Titulo LIKE '%"+libro+"%'";
+        //con el datalist no hace falta hacer una busqueda con la variable
+        //al sacar todos los libros con el datalist los filtra solo
+        String sql="SELECT Titulo FROM `titulos` WHERE Titulo LIKE '"+libro+"%'";
         pst=cn.prepareStatement(sql);
         rs=pst.executeQuery();
         
