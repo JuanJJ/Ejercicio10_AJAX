@@ -9,58 +9,163 @@ and open the template in the editor.
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        
+
         <script>
             function creaDiv() {
-                var div=document.createElement("div");
-                div.id="sugerencias";
-                var cajaTexto=document.getElementById("libro");
-                cajaTexto.setAttribute("list","libros");
+                var div = document.createElement("div");
+                div.id = "sugerencias";
+                var cajaTexto = document.getElementById("libro");
+                cajaTexto.setAttribute("list", "libros");
                 document.body.appendChild(div);
-                document.getElementById("libro").onkeyup=autocompletado;
+                document.getElementById("libro").onkeyup = autocompletado;
                 document.getElementById("libro").focus();
             }
-            
-            function autocompletado() {
-                var libro=document.getElementById("libro").value;
-                peticion_http = inicializa_xhr();
+
+            function autocompletado(evento) {
+                var libro = document.getElementById("libro").value;
+                if (evento.keyCode == 13) {
+
+                    informacionLibro();
+
+                } else {
+                    peticion_http = inicializa_xhr();
                     if (peticion_http) {
-                    peticion_http.onreadystatechange = cargarSugerencias;
-                    peticion_http.open('POST', 'respuestaLibros.jsp', true);
-                    peticion_http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                    var texto="libro="+encodeURIComponent(libro);
-                    peticion_http.send(texto);
-                    
-                    
+                        peticion_http.onreadystatechange = cargarSugerencias;
+                        peticion_http.open('POST', 'respuestaLibros.jsp', true);
+                        peticion_http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                        var texto = "libro=" + encodeURIComponent(libro);
+                        peticion_http.send(texto);
+
+                    }
                 }
-                
-                function cargarSugerencias(evento) {
+
+                function cargarSugerencias() {
                     if (peticion_http.readyState == 4) {
                         if (peticion_http.status == 200) {
-                            if(evento.keyCode != 38&&evento.keyCode!=13&&evento.keyCode != 40){
 
-                                var respuesta_Json = peticion_http.responseText;
-                                var titulos = eval("(" + respuesta_Json + ")");
-                                var sugerencias = document.getElementById("sugerencias");
-                                sugerencias.innerHTML="";
-                                console.log(titulos);
-                                var lista=document.createElement("datalist");
-                                lista.id="libros";
-                                sugerencias.appendChild(lista);
-                                
-                                for (var i = 0; i < titulos.length; i++) {
-                                    var opcion=document.createElement("option");
-                                    opcion.value=titulos[i].titulo;
-                                    lista.appendChild(opcion);
-                                }
-                                
+
+                            var respuesta_Json = peticion_http.responseText;
+                            var titulos = eval("(" + respuesta_Json + ")");
+                            var sugerencias = document.getElementById("sugerencias");
+                            sugerencias.innerHTML = "";
+                            console.log(titulos);
+                            var lista = document.createElement("datalist");
+                            lista.id = "libros";
+                            sugerencias.appendChild(lista);
+
+                            for (var i = 0; i < titulos.length; i++) {
+                                var opcion = document.createElement("option");
+                                opcion.value = titulos[i].titulo;
+                                lista.appendChild(opcion);
                             }
+
                         }
+
                     }
                 }
             }
-            
-            
+
+            //VER INFORMACION DE UN LIBRO
+
+            function informacionLibro() {
+                peticion_http = inicializa_xhr();
+                if (peticion_http) {
+                    var libro = document.getElementById("libro").value;
+                    console.log(libro);
+                    peticion_http.onreadystatechange = cargarInformacion;
+                    peticion_http.open('POST', 'informacionLibros.jsp', true);
+                    peticion_http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    var texto = "libro=" + encodeURIComponent(libro);
+                    peticion_http.send(texto);
+
+                    function cargarInformacion() {
+                        if (peticion_http.readyState == 4) {
+                            if (peticion_http.status == 200) {
+
+
+                                var respuesta_Json = peticion_http.responseText;
+                                titulos = eval("(" + respuesta_Json + ")");
+                                var div = document.getElementById("resultado");
+                                div.innerHTML = "";
+
+                                for (var i = 0; i < titulos.length; i++) {
+                                    var tabla = document.createElement("table");
+                                    tabla.border = "1";
+
+                                    var tr = document.createElement("tr");
+                                    var td = document.createElement("td");
+                                    var texto = document.createTextNode("Titulo: ");
+                                    td.appendChild(texto);
+                                    tr.appendChild(td);
+                                    var td = document.createElement("td");
+                                    var titulo = document.createTextNode(titulos[i].titulo);
+                                    td.appendChild(titulo);
+                                    tr.appendChild(td);
+                                    tabla.appendChild(tr);
+
+                                    var tr = document.createElement("tr");
+                                    var td = document.createElement("td");
+                                    var texto = document.createTextNode("Autor: ");
+                                    td.appendChild(texto);
+                                    tr.appendChild(td);
+                                    var td = document.createElement("td");
+                                    var autor = document.createTextNode(titulos[i].autor);
+                                    td.appendChild(autor);
+                                    tr.appendChild(td);
+                                    tabla.appendChild(tr);
+
+
+                                    var tr = document.createElement("tr");
+                                    var td = document.createElement("td");
+                                    var texto = document.createTextNode("ISBN: ");
+                                    td.appendChild(texto);
+                                    tr.appendChild(td);
+                                    var td = document.createElement("td");
+                                    var isbn = document.createTextNode(titulos[i].isbn);
+                                    td.appendChild(isbn);
+                                    tr.appendChild(td);
+                                    tabla.appendChild(tr);
+
+
+                                    var tr = document.createElement("tr");
+                                    var td = document.createElement("td");
+                                    var texto = document.createTextNode("Descripcion :");
+                                    td.appendChild(texto);
+                                    tr.appendChild(td);
+                                    var td = document.createElement("td");
+                                    var descripcion = document.createTextNode(titulos[i].descripcion);
+                                    td.appendChild(descripcion);
+                                    tr.appendChild(td);
+                                    tabla.appendChild(tr);
+
+
+                                    var tr = document.createElement("tr");
+                                    var td = document.createElement("td");
+                                    var texto = document.createTextNode("Editorial: ");
+                                    td.appendChild(texto);
+                                    tr.appendChild(td);
+                                    var td = document.createElement("td");
+                                    var editorial = document.createTextNode(titulos[i].editorial);
+                                    td.appendChild(editorial);
+                                    tr.appendChild(td);
+                                    tabla.appendChild(tr);
+
+                                    div.appendChild(tabla);
+
+                                    var br = document.createElement("br");
+                                    div.appendChild(br);
+
+                                }
+
+
+
+                            }
+                        }
+
+                    }
+                }
+            }
+
             function inicializa_xhr() {
                 if (window.XMLHttpRequest) {
                     return new XMLHttpRequest();
@@ -73,8 +178,8 @@ and open the template in the editor.
     <body onload="creaDiv()">
         <div>Autocompletado</div>
 
-            <label for="libro">Introduce el nombre del libro</label>
-            <input type="text" name="libro" id="libro">
-
+        <label for="libro">Introduce el nombre del libro</label>
+        <input type="text" name="libro" id="libro">
+        <div id="resultado"></div>
     </body>
 </html>

@@ -65,4 +65,24 @@ public class Bd {
         }
         return lista;
     }
+    
+    public List<Libro> getInformacionLibro(String libro) throws SQLException{
+        List<Libro>lista=new ArrayList<>();
+        //con el datalist no hace falta hacer una busqueda con la variable
+        //al sacar todos los libros con el datalist los filtra solo
+        String sql="SELECT titulos.Titulo, autor.Nombre, titulos.ISBN, titulos.Descripcion, editorial.NameEditorial from titulos, editorial, autor WHERE (titulos.IDautor=autor.IDAutor) and (editorial.IDEditorial=titulos.IDeditorial) and titulos.Titulo LIKE '"+libro+"'";
+        pst=cn.prepareStatement(sql);
+        rs=pst.executeQuery();
+        
+        while (rs.next()) {            
+            String titulo=rs.getString(1);
+            String autor=rs.getString(2);
+            String isbn=rs.getString(3);
+            String descripcion=rs.getString(4);
+            String editorial=rs.getString(5);
+            Libro lib=new Libro(titulo, autor, isbn, descripcion, editorial);
+            lista.add(lib);
+        }
+        return lista;
+    }
 }

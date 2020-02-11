@@ -12,22 +12,32 @@ and open the template in the editor.
 
         <script>
             function creaDiv() {
-                var div = document.createElement("div");
-                div.id = "sugerencias";
-                var cajaTexto = document.getElementById("libro");
-                cajaTexto.setAttribute("list", "libros");
-                document.body.appendChild(div);
+                titulos = null;
                 document.getElementById("libro").onkeyup = autocompletado;
+                avanzaSeleccion = -1;
                 document.getElementById("libro").focus();
             }
 
             function autocompletado(evento) {
                 var libro = document.getElementById("libro").value;
+                if (evento.keyCode == 40) {
+                    avanzaSeleccion++;
+                    seleccionar();
+                } else
+                if (evento.keyCode == 38) {
+                    avanzaSeleccion--;
+                    seleccionar();
+                } else
                 if (evento.keyCode == 13) {
-
-                    informacionLibro();
-
+                    var listaF = document.getElementById(avanzaSeleccion);
+                    if (avanzaSeleccion != -1) {
+                        document.getElementById("libro").value = listaF.value;
+                        informacionLibro();
+                    }
+                    var sugerencias = document.getElementById("sugerencias");
+                    sugerencias.style.display = "none";
                 } else {
+                    avanzaSeleccion = -1;
                     peticion_http = inicializa_xhr();
                     if (peticion_http) {
                         peticion_http.onreadystatechange = cargarSugerencias;
@@ -36,33 +46,73 @@ and open the template in the editor.
                         var texto = "libro=" + encodeURIComponent(libro);
                         peticion_http.send(texto);
 
+
                     }
                 }
+                console.log(avanzaSeleccion);
+            }
 
-                function cargarSugerencias() {
-                    if (peticion_http.readyState == 4) {
-                        if (peticion_http.status == 200) {
+            function seleccionar() {
+                var listaF = document.getElementById(avanzaSeleccion);
+                if (avanzaSeleccion < 0) {
+                    avanzaSeleccion = 0;
+                }
+                if (avanzaSeleccion == titulos.length) {
+                    avanzaSeleccion = titulos.length - 1;
+                }
+                if (listaF != null) {
+                    listaF.selected = "on";
+                }
+            }
+            function cargarSugerencias() {
+                if (peticion_http.readyState == 4) {
+                    if (peticion_http.status == 200) {
+                        var caja = document.getElementById("libro");
+
+                        var respuesta_Xml = peticion_http.responseXML;
+                        titulos = respuesta_Xml.getElementsByTagName("titulo");
 
 
-                            var respuesta_Json = peticion_http.responseText;
-                            var titulos = eval("(" + respuesta_Json + ")");
-                            var sugerencias = document.getElementById("sugerencias");
-                            sugerencias.innerHTML = "";
-                            console.log(titulos);
-                            var lista = document.createElement("datalist");
-                            lista.id = "libros";
-                            sugerencias.appendChild(lista);
+                        var sugerencias = document.getElementById("sugerencias");
+                        console.log(titulos);
+                        console.log(sugerencias);
+                        var lista = document.createElement("select");
+                        lista.size = "5";
+                        sugerencias.style.display = "none";
+                        lista.style.width = "450px";
+                        lista.id = "lista";
+                        sugerencias.style.position = "absolute";
+                        sugerencias.style.marginLeft = "200px";
+                        sugerencias.style.zIndex = "9999";
+                        sugerencias.innerHTML = "";
+                        sugerencias.appendChild(lista);
+                        var cajaTexto = document.getElementById("libro").value;
+                        if (titulos.length != 0) {
+                            if (cajaTexto.length != 0) {
+                                sugerencias.style.display = "block";
+                                for (var i = 0; i < titulos.length; i++) {
+                                    var li = document.createElement("option");
+                                    li.id = i;
+                                    li.value = titulos[i].firstChild.nodeValue;
+                                    var texto = document.createTextNode(titulos[i].firstChild.nodeValue);
+                                    li.appendChild(texto);
+                                    lista.appendChild(li);
 
-                            for (var i = 0; i < titulos.length; i++) {
-                                var opcion = document.createElement("option");
-                                opcion.value = titulos[i].titulo;
-                                lista.appendChild(opcion);
+                                }
+                            } else {
+                                sugerencias.style.display = "none";
                             }
-
+                        } else {
+                            sugerencias.style.display = "block";
+                            var li = document.createElement("option");
+                            var texto = document.createTextNode("No existe ese libro");
+                            li.appendChild(texto);
+                            lista.appendChild(li);
                         }
 
                     }
                 }
+
             }
 
             //VER INFORMACION DE UN LIBRO
@@ -83,12 +133,16 @@ and open the template in the editor.
                             if (peticion_http.status == 200) {
 
 
-                                var respuesta_Json = peticion_http.responseText;
-                                titulos = eval("(" + respuesta_Json + ")");
+                                var respuesta_Xml = peticion_http.responseXML;
+                                var titulos1 = respuesta_Xml.getElementsByTagName("titulo");
+                                var autores = respuesta_Xml.getElementsByTagName("autor");
+                                var isbns = respuesta_Xml.getElementsByTagName("isbn");
+                                var descripciones = respuesta_Xml.getElementsByTagName("descripcion");
+                                var editoriales = respuesta_Xml.getElementsByTagName("editorial");
                                 var div = document.getElementById("resultado");
                                 div.innerHTML = "";
 
-                                for (var i = 0; i < titulos.length; i++) {
+                                for (var i = 0; i < titulos1.length; i++) {
                                     var tabla = document.createElement("table");
                                     tabla.border = "1";
 
@@ -98,7 +152,7 @@ and open the template in the editor.
                                     td.appendChild(texto);
                                     tr.appendChild(td);
                                     var td = document.createElement("td");
-                                    var titulo = document.createTextNode(titulos[i].titulo);
+                                    var titulo = document.createTextNode(titulos1[i].firstChild.nodeValue);
                                     td.appendChild(titulo);
                                     tr.appendChild(td);
                                     tabla.appendChild(tr);
@@ -109,7 +163,7 @@ and open the template in the editor.
                                     td.appendChild(texto);
                                     tr.appendChild(td);
                                     var td = document.createElement("td");
-                                    var autor = document.createTextNode(titulos[i].autor);
+                                    var autor = document.createTextNode(autores[i].firstChild.nodeValue);
                                     td.appendChild(autor);
                                     tr.appendChild(td);
                                     tabla.appendChild(tr);
@@ -121,7 +175,7 @@ and open the template in the editor.
                                     td.appendChild(texto);
                                     tr.appendChild(td);
                                     var td = document.createElement("td");
-                                    var isbn = document.createTextNode(titulos[i].isbn);
+                                    var isbn = document.createTextNode(isbns[i].firstChild.nodeValue);
                                     td.appendChild(isbn);
                                     tr.appendChild(td);
                                     tabla.appendChild(tr);
@@ -133,7 +187,7 @@ and open the template in the editor.
                                     td.appendChild(texto);
                                     tr.appendChild(td);
                                     var td = document.createElement("td");
-                                    var descripcion = document.createTextNode(titulos[i].descripcion);
+                                    var descripcion = document.createTextNode(descripciones[i].firstChild.nodeValue);
                                     td.appendChild(descripcion);
                                     tr.appendChild(td);
                                     tabla.appendChild(tr);
@@ -145,11 +199,10 @@ and open the template in the editor.
                                     td.appendChild(texto);
                                     tr.appendChild(td);
                                     var td = document.createElement("td");
-                                    var editorial = document.createTextNode(titulos[i].editorial);
+                                    var editorial = document.createTextNode(editoriales[i].firstChild.nodeValue);
                                     td.appendChild(editorial);
                                     tr.appendChild(td);
                                     tabla.appendChild(tr);
-
                                     div.appendChild(tabla);
 
                                     var br = document.createElement("br");
@@ -178,8 +231,11 @@ and open the template in the editor.
     <body onload="creaDiv()">
         <div>Autocompletado</div>
 
+
         <label for="libro">Introduce el nombre del libro</label>
         <input type="text" name="libro" id="libro">
+        <div id="sugerencias"></div>
         <div id="resultado"></div>
+
     </body>
 </html>
