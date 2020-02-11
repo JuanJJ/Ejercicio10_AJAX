@@ -9,7 +9,7 @@ and open the template in the editor.
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+        
         <script>
             function creaDiv() {
                 titulos = null;
@@ -70,6 +70,7 @@ and open the template in the editor.
                         var caja = document.getElementById("libro");
 
                         var respuesta_Json = peticion_http.responseText;
+                        
                         titulos = eval("(" + respuesta_Json + ")");
                         var sugerencias = document.getElementById("sugerencias");
                         console.log(titulos);
@@ -118,12 +119,12 @@ and open the template in the editor.
             function informacionLibro() {
                 peticion_http = inicializa_xhr();
                 if (peticion_http) {
-                    var libro = document.getElementById("libro").value;
+                    var libro1 = document.getElementById("libro").value;
                     console.log(libro);
                     peticion_http.onreadystatechange = cargarInformacion;
                     peticion_http.open('POST', 'informacionLibros.jsp', true);
                     peticion_http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                    var texto = "libro=" + encodeURIComponent(libro);
+                    var texto = "libro=" + encodeURIComponent(libro1);
                     peticion_http.send(texto);
 
                     function cargarInformacion() {
@@ -132,7 +133,9 @@ and open the template in the editor.
 
 
                                 var respuesta_Json = peticion_http.responseText;
+                                
                                 titulos = eval("(" + respuesta_Json + ")");
+                                console.log(titulos);
                                 var div = document.getElementById("resultado");
                                 div.innerHTML = "";
 
@@ -221,6 +224,12 @@ and open the template in the editor.
                 }
             }
         </script>
+        <style>
+            body {font-family: Arial, Helvetica, sans-serif;}
+            .select-selected {
+                background-color: DodgerBlue;
+            }
+        </style>
     </head>
     <body onload="creaDiv()">
         <div>Autocompletado</div>

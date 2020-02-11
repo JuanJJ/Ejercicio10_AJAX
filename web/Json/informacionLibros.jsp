@@ -16,10 +16,11 @@
     
     String json="[";
     for(int i=0;i<listaLibros.size();i++){
+        String descripcion=listaLibros.get(i).getDescripcion().replace('\"', '\'');
         json+="{titulo: \""+listaLibros.get(i).getTitulo()+"\","
                 + "autor: \""+listaLibros.get(i).getAutor()+"\","
                 + "isbn: \""+listaLibros.get(i).getIsbn()+"\","
-                + "descripcion: \""+listaLibros.get(i).getDescripcion()+"\","
+                + "descripcion: \""+descripcion+"\","
                 + "editorial: \""+listaLibros.get(i).getEditorial()+"\"},";
     }
     if(listaLibros.size()!=0){
