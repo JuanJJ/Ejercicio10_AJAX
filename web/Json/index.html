@@ -9,7 +9,7 @@ and open the template in the editor.
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        
+
         <script>
             function creaDiv() {
                 titulos = null;
@@ -34,7 +34,7 @@ and open the template in the editor.
                         document.getElementById("libro").value = listaF.value;
                         informacionLibro();
                     }
-                    var sugerencias=document.getElementById("sugerencias");
+                    var sugerencias = document.getElementById("sugerencias");
                     sugerencias.style.display = "none";
                 } else {
                     avanzaSeleccion = -1;
@@ -70,7 +70,7 @@ and open the template in the editor.
                         var caja = document.getElementById("libro");
 
                         var respuesta_Json = peticion_http.responseText;
-                        
+
                         titulos = eval("(" + respuesta_Json + ")");
                         var sugerencias = document.getElementById("sugerencias");
                         console.log(titulos);
@@ -80,9 +80,9 @@ and open the template in the editor.
                         sugerencias.style.display = "none";
                         lista.style.width = "450px";
                         lista.id = "lista";
-                        sugerencias.style.position="absolute";
-                        sugerencias.style.marginLeft="200px";
-                        sugerencias.style.zIndex="9999";
+                        sugerencias.style.position = "absolute";
+                        sugerencias.style.marginLeft = "200px";
+                        sugerencias.style.zIndex = "9999";
                         sugerencias.innerHTML = "";
                         sugerencias.appendChild(lista);
                         var cajaTexto = document.getElementById("libro").value;
@@ -113,7 +113,7 @@ and open the template in the editor.
                 }
 
             }
-            
+
             //VER INFORMACION DE UN LIBRO
 
             function informacionLibro() {
@@ -133,7 +133,7 @@ and open the template in the editor.
 
 
                                 var respuesta_Json = peticion_http.responseText;
-                                
+
                                 titulos = eval("(" + respuesta_Json + ")");
                                 console.log(titulos);
                                 var div = document.getElementById("resultado");
@@ -226,9 +226,11 @@ and open the template in the editor.
         </script>
         <style>
             body {font-family: Arial, Helvetica, sans-serif;}
-            .select-selected {
-                background-color: DodgerBlue;
+            
+            input[type="text"]{
+                width: 300px;
             }
+
         </style>
     </head>
     <body onload="creaDiv()">
